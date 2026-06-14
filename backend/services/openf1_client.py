@@ -32,6 +32,25 @@ class OpenF1Client:
                 logger.error(f"An error occurred while fetching session {session_key}: {e}")
                 raise
 
+    async def fetch_sessions(self, year: int = None):
+        """Fetch all sessions, optionally filtered by year."""
+        url = f"{self.base_url}/sessions"
+        params = {}
+        if year:
+            params["year"] = year
+            
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            try:
+                response = await client.get(url, params=params)
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPStatusError as e:
+                logger.error(f"HTTP error occurred while fetching sessions: {e}")
+                raise
+            except Exception as e:
+                logger.error(f"An error occurred while fetching sessions: {e}")
+                raise
+
     async def fetch_telemetry(self, session_key: str, driver_number: int):
         """Fetch raw telemetry data (car_data) for a specific session and driver."""
         url = f"{self.base_url}/car_data"

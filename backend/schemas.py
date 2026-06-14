@@ -2,9 +2,12 @@ from pydantic import BaseModel
 from typing import List, Any, Optional
 
 class SessionResponse(BaseModel):
-    session_id: str
+    session_id: int
     circuit_name: str
     year: int
+    session_type: Optional[str] = None
+    country: Optional[str] = None
+    date: Optional[str] = None
 
     class Config:
         from_attributes = True
