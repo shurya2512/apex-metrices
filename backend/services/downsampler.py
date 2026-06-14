@@ -21,7 +21,11 @@ class TelemetryDownsampler:
             return raw_data
             
         # 2. Convert date to datetime objects
-        df["date"] = pd.to_datetime(df["date"])
+        # OpenF1 returns ISO 8601 strings that may or may not include microseconds
+        # (e.g. "2024-12-07T14:58:05+00:00" or "2024-12-07T14:58:05.123000+00:00").
+        # format='ISO8601' handles all variants without requiring an exact strftime pattern.
+        df["date"] = pd.to_datetime(df["date"], format="ISO8601")
+
         
         # Sort by date just in case it's out of order
         df = df.sort_values(by="date")
