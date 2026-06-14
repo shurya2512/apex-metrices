@@ -22,7 +22,11 @@ class OpenF1Client:
                     return None
                 return data[0] # Return the first matching session
             except httpx.HTTPStatusError as e:
-                logger.error(f"HTTP error occurred while fetching session {session_key}: {e}")
+                if e.response.status_code == 401:
+                    logger.error(f"OpenF1 API requires authentication during live sessions. Please try again later or add an API key.")
+                    print("ERROR: OpenF1 API requires authentication during live sessions. Please try again later or add an API key.")
+                else:
+                    logger.error(f"HTTP error occurred while fetching session {session_key}: {e}")
                 raise
             except Exception as e:
                 logger.error(f"An error occurred while fetching session {session_key}: {e}")
@@ -42,7 +46,11 @@ class OpenF1Client:
                 response.raise_for_status()
                 return response.json()
             except httpx.HTTPStatusError as e:
-                logger.error(f"HTTP error occurred while fetching telemetry for session {session_key}, driver {driver_number}: {e}")
+                if e.response.status_code == 401:
+                    logger.error(f"OpenF1 API requires authentication during live sessions. Please try again later or add an API key.")
+                    print("ERROR: OpenF1 API requires authentication during live sessions. Please try again later or add an API key.")
+                else:
+                    logger.error(f"HTTP error occurred while fetching telemetry for session {session_key}, driver {driver_number}: {e}")
                 raise
             except Exception as e:
                 logger.error(f"An error occurred while fetching telemetry for session {session_key}, driver {driver_number}: {e}")
