@@ -15,3 +15,9 @@ app.add_middleware(
 @app.get("/")
 def health_check():
     return {"status": "ok", "service": "ApexMetrics Backend"}
+
+# Import routers
+from routers import sessions, telemetry
+
+app.include_router(sessions.router)
+app.include_router(telemetry.router)
