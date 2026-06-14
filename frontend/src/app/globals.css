@@ -1,26 +1,259 @@
 @import "tailwindcss";
 
+/* ============================================================
+   APEXMETRICS — F1 TELEMETRY COMMAND CENTER DESIGN SYSTEM
+   ============================================================ */
+
+/* ---- CSS Custom Properties (Design Tokens) ---- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core Palette */
+  --am-bg-primary: #0b0f19;
+  --am-bg-surface: #161f30;
+  --am-bg-elevated: #1c2940;
+  --am-border: #1e293b;
+  --am-border-hover: #334155;
+
+  /* Brand */
+  --am-red: #e10600;
+  --am-red-glow: rgba(225, 6, 0, 0.4);
+
+  /* Data Indicators */
+  --am-green: #22c55e;
+  --am-yellow: #eab308;
+  --am-purple: #a855f7;
+
+  /* Text */
+  --am-text-primary: #f1f5f9;
+  --am-text-secondary: #94a3b8;
+  --am-text-muted: #64748b;
+
+  /* Fonts */
+  --font-ui: var(--font-inter);
+  --font-data: var(--font-fira-code);
 }
 
+/* ---- Tailwind v4 Theme Tokens ---- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-am-bg: var(--am-bg-primary);
+  --color-am-surface: var(--am-bg-surface);
+  --color-am-elevated: var(--am-bg-elevated);
+  --color-am-border: var(--am-border);
+  --color-am-border-hover: var(--am-border-hover);
+
+  --color-am-red: var(--am-red);
+  --color-am-green: var(--am-green);
+  --color-am-yellow: var(--am-yellow);
+  --color-am-purple: var(--am-purple);
+
+  --color-am-text: var(--am-text-primary);
+  --color-am-text-secondary: var(--am-text-secondary);
+  --color-am-text-muted: var(--am-text-muted);
+
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-data);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---- Base Styles ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background-color: var(--am-bg-primary);
+  color: var(--am-text-primary);
+  font-family: var(--font-ui), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
+
+/* ---- Selection ---- */
+::selection {
+  background: var(--am-red);
+  color: #fff;
+}
+
+/* ---- Scrollbar (WebKit) ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--am-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--am-border);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--am-border-hover);
+}
+
+/* ============================================================
+   KEYFRAME ANIMATIONS
+   ============================================================ */
+
+/* Tyre spin — used by F1TyreLoader dashed accent ring */
+@keyframes tyre-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Hub bolt glow pulse — center of tyre loader */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px 2px rgba(234, 179, 8, 0.5);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 20px 6px rgba(234, 179, 8, 0.8);
+    opacity: 0.85;
+  }
+}
+
+/* Red light glow — used by FiveRedLights */
+@keyframes red-light-glow {
+  0% {
+    background-color: #374151;
+    box-shadow: none;
+  }
+  100% {
+    background-color: var(--am-red);
+    box-shadow: 0 0 16px 4px var(--am-red-glow);
+  }
+}
+
+/* Fade up entrance — for section/card reveals */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide in from left — for sidebar/nav elements */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Horizontal scan line — HUD data effect */
+@keyframes scan-line {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 0.5; }
+  90%  { opacity: 0.5; }
+  100% { transform: translateY(400%); opacity: 0; }
+}
+
+/* Live pulse — green dot animation */
+@keyframes live-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
+}
+
+/* Underline slide — DRS zone nav indicator */
+@keyframes underline-expand {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+/* Font data — applies monospace telemetry font */
+.font-data {
+  font-family: var(--font-data), 'Courier New', monospace;
+}
+
+/* Scan line overlay — adds a subtle moving HUD scan effect */
+.hud-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(225, 6, 0, 0.03) 50%,
+    transparent 100%
+  );
+  height: 30%;
+  animation: scan-line 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Carbon texture — subtle cross-hatch pattern for surfaces */
+.carbon-texture {
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.02) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.02) 75%);
+  background-size: 4px 4px;
+  background-position: 0 0, 0 2px, 2px -2px, -2px 0;
+}
+
+/* Grid line background — faint telemetry grid */
+.telemetry-grid {
+  background-image:
+    linear-gradient(rgba(30, 41, 59, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Animated entrance — stagger children */
+.stagger-children > * {
+  animation: fade-up 0.4s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.10s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.16s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.20s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.24s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.28s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.32s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.36s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.40s; }
+.stagger-children > *:nth-child(11) { animation-delay: 0.44s; }
+.stagger-children > *:nth-child(12) { animation-delay: 0.48s; }

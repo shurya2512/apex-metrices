@@ -1,65 +1,157 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import { Activity, Radio, Zap } from "lucide-react";
+import { fetchSessions } from "@/lib/api";
+import type { Session } from "@/lib/api";
+import SessionCard from "@/components/SessionCard";
+import F1TyreLoader from "@/components/F1TyreLoader";
 
-export default function Home() {
+/* ---------- Hero Section ---------- */
+function HeroSection() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <section className="relative overflow-hidden border-b border-am-border">
+      {/* Telemetry grid background */}
+      <div className="absolute inset-0 telemetry-grid opacity-40" aria-hidden="true" />
+
+      {/* Subtle red gradient accent from top-left */}
+      <div
+        className="absolute top-0 left-0 h-64 w-96 opacity-[0.07]"
+        style={{
+          background: "radial-gradient(ellipse at top left, #E10600 0%, transparent 70%)",
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="relative mx-auto max-w-[1600px] px-4 py-12 lg:px-6 lg:py-16">
+        <div className="flex flex-col gap-4">
+          {/* Sector label */}
+          <div className="flex items-center gap-2">
+            <div className="h-[2px] w-8 bg-am-red" aria-hidden="true" />
+            <span className="font-data text-[10px] tracking-[0.35em] text-am-red uppercase">
+              Sector 1 — Command Center
+            </span>
+          </div>
+
+          {/* Main heading */}
+          <h1 className="text-3xl font-bold tracking-tight text-am-text sm:text-4xl lg:text-5xl">
+            Race
+            <span className="text-am-red"> Intelligence</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="max-w-xl text-sm leading-relaxed text-am-text-secondary lg:text-base">
+            Browse available Formula 1 sessions. Select a Grand Prix to access
+            real-time telemetry overlays, driver comparisons, and lap-by-lap
+            performance analysis.
           </p>
+
+          {/* Stat pills */}
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 rounded-[2px] border border-am-border bg-am-surface px-3 py-1.5">
+              <Activity size={12} className="text-am-green" aria-hidden="true" />
+              <span className="font-data text-[11px] text-am-text-secondary">
+                Telemetry Feed
+              </span>
+            </div>
+            <div className="flex items-center gap-2 rounded-[2px] border border-am-border bg-am-surface px-3 py-1.5">
+              <Radio size={12} className="text-am-yellow" aria-hidden="true" />
+              <span className="font-data text-[11px] text-am-text-secondary">
+                OpenF1 API
+              </span>
+            </div>
+            <div className="flex items-center gap-2 rounded-[2px] border border-am-border bg-am-surface px-3 py-1.5">
+              <Zap size={12} className="text-am-red" aria-hidden="true" />
+              <span className="font-data text-[11px] text-am-text-secondary">
+                Downsampled
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Loading fallback ---------- */
+function SessionsLoading() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-24">
+      <F1TyreLoader size={56} />
+      <span className="font-data text-xs tracking-widest text-am-text-muted uppercase">
+        Fetching session data...
+      </span>
+    </div>
+  );
+}
+
+/* ---------- Empty state ---------- */
+function SessionsEmpty() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-[2px] border border-am-border bg-am-surface">
+        <Radio size={24} className="text-am-text-muted" />
+      </div>
+      <h2 className="text-lg font-semibold text-am-text">No Sessions Cached</h2>
+      <p className="max-w-sm text-sm text-am-text-secondary">
+        The backend has not cached any session data yet. Start the FastAPI
+        server and ingest sessions from the OpenF1 API to populate this view.
+      </p>
+      <div className="mt-2 rounded-[2px] border border-am-border bg-am-surface px-4 py-2">
+        <code className="font-data text-xs text-am-yellow">
+          GET /api/sessions
+        </code>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Session Grid (async data fetch) ---------- */
+async function SessionGrid() {
+  let sessions: Session[] = [];
+
+  try {
+    sessions = await fetchSessions();
+  } catch {
+    // Backend not running — show empty state gracefully
+    return <SessionsEmpty />;
+  }
+
+  if (!sessions || sessions.length === 0) {
+    return <SessionsEmpty />;
+  }
+
+  return (
+    <div className="stagger-children grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {sessions.map((session) => (
+        <SessionCard key={session.session_id} session={session} />
+      ))}
+    </div>
+  );
+}
+
+/* ---------- Page ---------- */
+export default function HomePage() {
+  return (
+    <div className="flex flex-1 flex-col">
+      <HeroSection />
+
+      <section className="mx-auto w-full max-w-[1600px] px-4 py-8 lg:px-6 lg:py-10">
+        {/* Section header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-4 w-[2px] bg-am-red" aria-hidden="true" />
+            <h2 className="text-sm font-semibold tracking-wide text-am-text uppercase">
+              Available Sessions
+            </h2>
+          </div>
+          <span className="font-data text-[10px] tracking-widest text-am-text-muted uppercase">
+            Cache Layer
+          </span>
         </div>
-      </main>
+
+        {/* Session grid with Suspense loading */}
+        <Suspense fallback={<SessionsLoading />}>
+          <SessionGrid />
+        </Suspense>
+      </section>
     </div>
   );
 }
