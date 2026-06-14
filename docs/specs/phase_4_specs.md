@@ -1,29 +1,62 @@
 # Phase 4 Specs: Backend REST API Development
 
-## 1. CORS Configuration
-In `main.py`:
-```python
-from fastapi.middleware.cors import CORSMiddleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://your-production-url.com"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+## 📁 File Structure to Create
+```text
+backend/
+├── schemas.py
+├── routers/
+│   ├── sessions.py
+│   └── telemetry.py
 ```
 
-## 2. API Routers
-Create `routers/data.py` and include it in `main.py`.
+## 🛠️ Required Libraries & Tools
+- `fastapi` & `pydantic` (for endpoint definitions and data validation).
 
-### Endpoint: `GET /api/sessions`
-- **Logic:** Query `sessions_cache` table. Return all available sessions.
-- **Response:** List of `{ session_id, circuit_name, year }`.
+## 💻 Technical Implementation Details
 
-### Endpoint: `GET /api/sessions/{session_id}/laps`
-- **Logic:** Query `laps_cache` table where `session_id == session_id`.
-- **Response:** List of `{ lap_id, driver_number }`.
+### 1. Pydantic Schemas (`schemas.py`)
+Define what the frontend should expect to receive:
+```python
+from pydantic import BaseModel
+from typing import List, Any
 
-### Endpoint: `GET /api/laps/{lap_id}/telemetry`
-- **Logic:** Call `get_or_fetch_telemetry` from `services/cache_manager.py`.
-- **Response:** JSON array of telemetry points `[ { time, speed, rpm, gear, throttle, brake } ]`.
+class SessionResponse(BaseModel):
+    session_id: str
+    circuit_name: str
+    year: int
+
+class TelemetryDataPoint(BaseModel):
+    time: float
+    speed: float
+    rpm: float
+    gear: int
+    throttle: float
+    brake: float
+
+class TelemetryResponse(BaseModel):
+    lap_id: str
+    data: List[TelemetryDataPoint]
+```
+
+### 2. FastAPI Routers (`routers/sessions.py` & `routers/telemetry.py`)
+**Router: Sessions**
+- `router = APIRouter(prefix="/api/sessions", tags=["Sessions"])`
+- `@router.get("/", response_model=List[SessionResponse])`
+  - Inject `db: Session = Depends(get_db)`.
+  - Fetch list of cached sessions or fetch index from OpenF1.
+
+**Router: Telemetry**
+- `router = APIRouter(prefix="/api/laps", tags=["Telemetry"])`
+- `@router.get("/{lap_id}/telemetry", response_model=TelemetryResponse)`
+  - Inject `db`.
+  - Parse `lap_id` to get `session_id`, `driver_number`, etc.
+  - Call `await get_lap_telemetry(...)`.
+
+### 3. Main App Inclusion
+Update `main.py` to include the routers:
+```python
+from routers import sessions, telemetry
+
+app.include_router(sessions.router)
+app.include_router(telemetry.router)
+```

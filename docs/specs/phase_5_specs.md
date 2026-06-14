@@ -1,16 +1,44 @@
 # Phase 5 Specs: Frontend Command Center & Navigation
 
-## 1. Layout & Styling
-- Edit `app/layout.tsx` to include a global Navbar component.
-- Apply a dark theme utilizing Tailwind classes (e.g., `bg-slate-900 text-white`).
+## 📁 File Structure to Create
+```text
+frontend/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── sessions/
+│       └── [session_id]/
+│           └── page.tsx
+├── components/
+│   ├── Navbar.tsx
+│   └── SessionCard.tsx
+└── lib/
+    └── api.ts
+```
 
-## 2. Data Fetching
-- **Tool:** Use `@tanstack/react-query` or `swr` for client-side data fetching, or standard React Server Components if fetching at request time.
-- **Hook:** Create a custom hook `useSessions()` that fetches from `http://localhost:8000/api/sessions`.
+## 🛠️ Required Libraries & Tools
+- `lucide-react`: For sleek iconography.
+- `swr` or `@tanstack/react-query`: Optional, for client-side data fetching.
 
-## 3. Components
-- **`SessionList`:** A responsive grid or list component iterating over the fetched sessions.
-- **`SessionCard`:** Displays the Circuit Name, Year, and a button to "Analyze".
+## 💻 Technical Implementation Details
 
-## 4. Routing
-- The "Analyze" button pushes the user to `/sessions/[session_id]`.
+### 1. API Helper (`lib/api.ts`)
+```typescript
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+export async function fetchSessions() {
+  const res = await fetch(`${API_BASE}/api/sessions`);
+  if (!res.ok) throw new Error("Failed to fetch sessions");
+  return res.json();
+}
+```
+
+### 2. Global Layout (`app/layout.tsx`)
+- Implement `<Navbar />` which should contain the "ApexMetrics" logo and navigation links.
+- Set the `<body>` class to `bg-slate-950 text-slate-50` to establish the dark theme.
+
+### 3. Homepage (`app/page.tsx`)
+- Call `fetchSessions()`.
+- Map over the resulting array to render `<SessionCard />` components.
+- Each `<SessionCard />` should display `circuit_name` and `year`.
+- Wrap the card in a `<Link href={\`/sessions/\${session.session_id}\`}>`.
