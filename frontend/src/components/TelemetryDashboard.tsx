@@ -110,10 +110,20 @@ export default function TelemetryDashboard({ sessionId }: Props) {
     const lapIdA = `${sessionId}_${driverA}_1`;
     const lapIdB = `${sessionId}_${driverB}_1`;
 
-    Promise.all([fetchTelemetry(lapIdA), fetchTelemetry(lapIdB)])
+    Promise.allSettled([fetchTelemetry(lapIdA), fetchTelemetry(lapIdB)])
       .then(([resA, resB]) => {
         if (cancelled) return;
-        const merged = mergeTelemetryData(resA.data, resB.data);
+        
+        const dataA = resA.status === "fulfilled" ? resA.value.data : [];
+        const dataB = resB.status === "fulfilled" ? resB.value.data : [];
+        
+        // If both failed, show error
+        if (resA.status === "rejected" && resB.status === "rejected") {
+          setTelemetryError("Failed to fetch telemetry for both drivers.");
+          return;
+        }
+
+        const merged = mergeTelemetryData(dataA, dataB);
         setMergedData(merged);
       })
       .catch((err: unknown) => {
@@ -139,14 +149,14 @@ export default function TelemetryDashboard({ sessionId }: Props) {
 
     let cancelled = false;
 
-    Promise.all([
+    Promise.allSettled([
       fetchLocationData(sessionId, driverA),
       fetchLocationData(sessionId, driverB),
     ])
       .then(([resA, resB]) => {
         if (cancelled) return;
-        setLocationA(processLocationData(resA.data));
-        setLocationB(processLocationData(resB.data));
+        setLocationA(resA.status === "fulfilled" ? processLocationData(resA.value.data) : []);
+        setLocationB(resB.status === "fulfilled" ? processLocationData(resB.value.data) : []);
       })
       .catch(() => {
         // Location data is optional — silently fail and show empty track map

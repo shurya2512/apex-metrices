@@ -37,28 +37,31 @@ export default function TrackMap({
   labelA,
   labelB,
 }: Props) {
-  /* ---- Compute bounds ONCE from Driver A's full dataset ---- */
+  /* ---- Determine primary location dataset to build the track layout ---- */
+  const primaryLocation = locationA.length > 0 ? locationA : locationB;
+
+  /* ---- Compute bounds ONCE from the primary dataset ---- */
   const trackBounds = useMemo(
     () => computeBounds(
-      locationA.map((p) => ({ x: p.x, y: p.y })),
+      primaryLocation.map((p) => ({ x: p.x, y: p.y })),
       SVG_W,
       SVG_H,
       SVG_PADDING
     ),
-    [locationA]
+    [primaryLocation]
   );
 
   /* ---- Downsample + normalize for the track outline polyline ---- */
   const trackPolyline = useMemo(() => {
-    if (!trackBounds || locationA.length === 0) return "";
-    const step = Math.max(1, Math.floor(locationA.length / TRACK_OUTLINE_POINTS));
+    if (!trackBounds || primaryLocation.length === 0) return "";
+    const step = Math.max(1, Math.floor(primaryLocation.length / TRACK_OUTLINE_POINTS));
     const parts: string[] = [];
-    for (let i = 0; i < locationA.length; i += step) {
-      const p = applyBounds(locationA[i], trackBounds);
+    for (let i = 0; i < primaryLocation.length; i += step) {
+      const p = applyBounds(primaryLocation[i], trackBounds);
       parts.push(`${p.x.toFixed(1)},${p.y.toFixed(1)}`);
     }
     return parts.join(" ");
-  }, [locationA, trackBounds]);
+  }, [primaryLocation, trackBounds]);
 
   /* ---- Find active dot positions via binary search + cheap applyBounds ---- */
   const activeDotA = useMemo(() => {
@@ -77,9 +80,9 @@ export default function TrackMap({
 
   /* ---- Start/Finish marker ---- */
   const startFinish = useMemo(() => {
-    if (!trackBounds || locationA.length === 0) return null;
-    return applyBounds(locationA[0], trackBounds);
-  }, [locationA, trackBounds]);
+    if (!trackBounds || primaryLocation.length === 0) return null;
+    return applyBounds(primaryLocation[0], trackBounds);
+  }, [primaryLocation, trackBounds]);
 
   const hasTrackData = trackPolyline.length > 0;
 

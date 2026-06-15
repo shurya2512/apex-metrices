@@ -63,6 +63,7 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
 body {
@@ -83,21 +84,7 @@ body {
 
 /* ---- Scrollbar (WebKit) ---- */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--am-bg-primary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--am-border);
-  border-radius: 0;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--am-border-hover);
+  display: none;
 }
 
 /* ============================================================

@@ -31,10 +31,12 @@ export function mergeTelemetryData(
   const indexA = buildIndex(dataA);
   const indexB = buildIndex(dataB);
 
-  // Collect all unique time buckets across both drivers
-  const allBuckets = Array.from(
-    new Set([...indexA.keys(), ...indexB.keys()])
-  ).sort((a, b) => a - b);
+  // Safely collect all unique time buckets across both drivers without spread operator
+  // Spreading large Maps (e.g. 30k+ keys) can exceed the JS engine's call stack limit
+  const bucketSet = new Set<number>();
+  for (const k of indexA.keys()) bucketSet.add(k);
+  for (const k of indexB.keys()) bucketSet.add(k);
+  const allBuckets = Array.from(bucketSet).sort((a, b) => a - b);
 
   // Fill-forward state for when one driver is missing a bucket
   let lastA: TelemetryPoint = dataA[0];

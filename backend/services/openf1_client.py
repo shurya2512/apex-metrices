@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 class OpenF1Client:
     def __init__(self):
         self.base_url = "https://api.openf1.org/v1"
-        self.timeout = 30.0 # High frequency data can take a while to download
+        self.timeout = 60.0 # High frequency data can take a while to download
 
     async def fetch_session(self, session_key: str):
         """Fetch session metadata by session_key."""

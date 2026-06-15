@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Fira_Code } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import F1ScrollTracker from "@/components/F1ScrollTracker";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-am-bg text-am-text antialiased">
         <Navbar />
         <main className="flex flex-1 flex-col">{children}</main>
+        <F1ScrollTracker />
       </body>
     </html>
   );

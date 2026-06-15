@@ -45,7 +45,20 @@ class TelemetryDownsampler:
         
         # 4. Resample into fixed time buckets (e.g., 250ms) using mean
         # Using mean gives us a smoothed approximation of the values in that window
-        df_resampled = df_numeric.resample(self.interval).mean()
+        
+        # Determine total duration to prevent returning too many points for an entire session
+        total_duration = df["date"].iloc[-1] - df["date"].iloc[0]
+        total_seconds = total_duration.total_seconds()
+        
+        # Extract the base interval in seconds
+        base_interval_ms = int(self.interval.replace("ms", ""))
+        
+        # Target ~1000 points max to prevent browser UI freezing (Recharts Maximum call stack size exceeded)
+        target_points = 1000
+        interval_seconds = max(base_interval_ms / 1000.0, total_seconds / target_points)
+        dynamic_interval = f"{int(interval_seconds * 1000)}ms"
+        
+        df_resampled = df_numeric.resample(dynamic_interval).mean()
         
         # 5. Forward fill missing data
         # If a 250ms bucket had no raw data points, it will be NaN.

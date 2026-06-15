@@ -6,7 +6,7 @@ const SESSION_TYPE_STYLES: Record<string, { bg: string; text: string }> = {
   Race:       { bg: "bg-am-red/15 border-am-red/30", text: "text-am-red" },
   Qualifying: { bg: "bg-am-yellow/15 border-am-yellow/30", text: "text-am-yellow" },
   Practice:   { bg: "bg-am-green/15 border-am-green/30", text: "text-am-green" },
-  Sprint:     { bg: "bg-am-purple/15 border-am-purple/30", text: "text-am-purple" },
+  Sprint:     { bg: "bg-[#f97316]/15 border-[#f97316]/30", text: "text-[#f97316]" },
 };
 
 function getSessionStyle(type?: string) {
