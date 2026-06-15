@@ -17,7 +17,8 @@ def health_check():
     return {"status": "ok", "service": "ApexMetrics Backend"}
 
 # Import routers
-from routers import sessions, telemetry
+from routers import sessions, telemetry, location
 
 app.include_router(sessions.router)
 app.include_router(telemetry.router)
+app.include_router(location.router)

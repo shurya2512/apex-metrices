@@ -67,3 +67,25 @@ export async function fetchTelemetry(lapId: string): Promise<TelemetryResponse> 
   }
   return res.json() as Promise<TelemetryResponse>;
 }
+
+/* ---- Location Data ---- */
+
+export interface LocationRawPoint {
+  date: string;
+  x: number;
+  y: number;
+}
+
+export interface LocationResponse {
+  driver_number: number;
+  data: LocationRawPoint[];
+}
+
+export async function fetchLocationData(
+  sessionId: string,
+  driverNumber: number
+): Promise<LocationResponse> {
+  return apiFetch<LocationResponse>(
+    `/api/sessions/${sessionId}/drivers/${driverNumber}/location`
+  );
+}

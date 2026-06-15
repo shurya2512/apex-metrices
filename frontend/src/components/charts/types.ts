@@ -11,3 +11,7 @@ export const TELEMETRY_SYNC_ID = "telemetrySync";
 export const COLOR_A = "#E10600";
 /** Driver B = Electric Blue */
 export const COLOR_B = "#3B82F6";
+
+/** Callback for broadcasting the active hover time from charts */
+export type HoverTimeCallback = (time: number | null) => void;
+

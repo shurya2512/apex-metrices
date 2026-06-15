@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import {
   LineChart,
   Line,
@@ -8,18 +9,31 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-  ReferenceLine,
 } from "recharts";
-import type { MergedPoint } from "./types";
+import type { MergedPoint, HoverTimeCallback } from "./types";
 import { TELEMETRY_SYNC_ID, COLOR_A, COLOR_B } from "./types";
 
 interface Props {
   data: MergedPoint[];
   labelA: string;
   labelB: string;
+  onHoverTimeChange?: HoverTimeCallback;
 }
 
-export default function SpeedChart({ data, labelA, labelB }: Props) {
+export default function SpeedChart({ data, labelA, labelB, onHoverTimeChange }: Props) {
+  const handleMouseMove = useCallback(
+    (state: { activeLabel?: string | number }) => {
+      if (state?.activeLabel != null && onHoverTimeChange) {
+        onHoverTimeChange(Number(state.activeLabel));
+      }
+    },
+    [onHoverTimeChange]
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    onHoverTimeChange?.(null);
+  }, [onHoverTimeChange]);
+
   return (
     <div className="h-40 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -27,6 +41,8 @@ export default function SpeedChart({ data, labelA, labelB }: Props) {
           data={data}
           syncId={TELEMETRY_SYNC_ID}
           margin={{ top: 2, right: 8, left: 0, bottom: 0 }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
           <CartesianGrid
             strokeDasharray="1 4"
@@ -80,3 +96,4 @@ export default function SpeedChart({ data, labelA, labelB }: Props) {
     </div>
   );
 }
+

@@ -23,3 +23,12 @@ class TelemetryDataPoint(BaseModel):
 class TelemetryResponse(BaseModel):
     lap_id: str
     data: List[TelemetryDataPoint]
+
+class LocationPoint(BaseModel):
+    date: str
+    x: float
+    y: float
+
+class LocationResponse(BaseModel):
+    driver_number: int
+    data: List[LocationPoint]

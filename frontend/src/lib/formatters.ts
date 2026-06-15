@@ -80,3 +80,44 @@ function buildIndex(data: TelemetryPoint[]): Map<number, TelemetryPoint> {
 
   return map;
 }
+
+/* ---- Location data processing ---- */
+
+export interface LocationElapsedPoint {
+  elapsed_time: number;
+  x: number;
+  y: number;
+}
+
+/**
+ * Converts raw location data (with ISO date strings) into elapsed-time-indexed
+ * points so they can be correlated with the telemetry timeline.
+ *
+ * Optimized: ISO 8601 strings are lexicographically sortable, so we avoid
+ * creating Date objects during the sort. We only parse dates in a single
+ * final pass to compute elapsed_time.
+ */
+export function processLocationData(
+  rawData: { date: string; x: number; y: number }[]
+): LocationElapsedPoint[] {
+  if (!rawData.length) return [];
+
+  // ISO strings are lexicographically sortable — no Date parsing needed here
+  const sorted = [...rawData].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+
+  const startMs = new Date(sorted[0].date).getTime();
+
+  // Single pass: parse date only once per point
+  const result: LocationElapsedPoint[] = new Array(sorted.length);
+  for (let i = 0; i < sorted.length; i++) {
+    const p = sorted[i];
+    result[i] = {
+      elapsed_time: (new Date(p.date).getTime() - startMs) / 1000,
+      x: p.x,
+      y: p.y,
+    };
+  }
+
+  return result;
+}
+

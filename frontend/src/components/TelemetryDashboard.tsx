@@ -3,10 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, Crosshair } from "lucide-react";
 import type { Driver } from "@/lib/api";
-import { fetchDrivers, fetchTelemetry } from "@/lib/api";
-import { mergeTelemetryData, type MergedPoint } from "@/lib/formatters";
+import { fetchDrivers, fetchTelemetry, fetchLocationData } from "@/lib/api";
+import {
+  mergeTelemetryData,
+  processLocationData,
+  type MergedPoint,
+  type LocationElapsedPoint,
+} from "@/lib/formatters";
 import TimingTower from "./TimingTower";
 import F1TyreLoader from "./F1TyreLoader";
+import TrackMap from "./TrackMap";
 import SpeedChart from "./charts/SpeedChart";
 import RpmChart from "./charts/RpmChart";
 import GearChart from "./charts/GearChart";
@@ -25,6 +31,7 @@ interface ChartConfig {
     data: MergedPoint[];
     labelA: string;
     labelB: string;
+    onHoverTimeChange?: (time: number | null) => void;
   }>;
 }
 
@@ -41,12 +48,14 @@ const CHARTS: ChartConfig[] = [
  *
  * Layout: 30/70 asymmetric split
  *   Left (30%) — TimingTower: driver selection command rail
- *   Right (70%) — 5 stacked synchronized Recharts line charts
+ *   Right (70%) — TrackMap + 5 stacked synchronized Recharts line charts
  *
  * State machine:
  *   drivers → fetched on mount
  *   driverA / driverB → set by user via TimingTower
  *   mergedData → fetched + merged when both A and B are set
+ *   locationA / locationB → fetched when both drivers selected
+ *   activeHoverTime → set by chart hover, drives TrackMap dot positions
  */
 export default function TelemetryDashboard({ sessionId }: Props) {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -59,6 +68,11 @@ export default function TelemetryDashboard({ sessionId }: Props) {
   const [mergedData, setMergedData] = useState<MergedPoint[]>([]);
   const [telemetryLoading, setTelemetryLoading] = useState(false);
   const [telemetryError, setTelemetryError] = useState<string | null>(null);
+
+  /* ---- Track Map state ---- */
+  const [locationA, setLocationA] = useState<LocationElapsedPoint[]>([]);
+  const [locationB, setLocationB] = useState<LocationElapsedPoint[]>([]);
+  const [activeHoverTime, setActiveHoverTime] = useState<number | null>(null);
 
   /* ---- Fetch driver list on mount ---- */
   useEffect(() => {
@@ -115,12 +129,46 @@ export default function TelemetryDashboard({ sessionId }: Props) {
     return () => { cancelled = true; };
   }, [sessionId, driverA, driverB]);
 
+  /* ---- Fetch location data for track map when both drivers are selected ---- */
+  useEffect(() => {
+    if (driverA === null || driverB === null) {
+      setLocationA([]);
+      setLocationB([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    Promise.all([
+      fetchLocationData(sessionId, driverA),
+      fetchLocationData(sessionId, driverB),
+    ])
+      .then(([resA, resB]) => {
+        if (cancelled) return;
+        setLocationA(processLocationData(resA.data));
+        setLocationB(processLocationData(resB.data));
+      })
+      .catch(() => {
+        // Location data is optional — silently fail and show empty track map
+        if (!cancelled) {
+          setLocationA([]);
+          setLocationB([]);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [sessionId, driverA, driverB]);
+
   const handleSelectA = useCallback((num: number) => {
     setDriverA((prev) => (prev === num ? null : num));
   }, []);
 
   const handleSelectB = useCallback((num: number) => {
     setDriverB((prev) => (prev === num ? null : num));
+  }, []);
+
+  const handleHoverTimeChange = useCallback((time: number | null) => {
+    setActiveHoverTime(time);
   }, []);
 
   const driverAInfo = drivers.find((d) => d.driver_number === driverA);
@@ -196,7 +244,7 @@ export default function TelemetryDashboard({ sessionId }: Props) {
         )}
       </div>
 
-      {/* ── RIGHT TELEMETRY PANEL — 5 stacked charts ── */}
+      {/* ── RIGHT TELEMETRY PANEL — Track Map + 5 stacked charts ── */}
       <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
         {/* ── Empty state: prompt to select drivers ── */}
         {!telemetryLoading && mergedData.length === 0 && !telemetryError && (
@@ -241,7 +289,7 @@ export default function TelemetryDashboard({ sessionId }: Props) {
           </div>
         )}
 
-        {/* ── Charts: only render when data is ready ── */}
+        {/* ── Charts + TrackMap: only render when data is ready ── */}
         {!telemetryLoading && mergedData.length > 0 && (
           <div
             className="flex flex-col divide-y divide-am-border"
@@ -269,8 +317,17 @@ export default function TelemetryDashboard({ sessionId }: Props) {
               </span>
             </div>
 
+            {/* ── Track Map Panel ── */}
+            <TrackMap
+              locationA={locationA}
+              locationB={locationB}
+              activeHoverTime={activeHoverTime}
+              labelA={labelA}
+              labelB={labelB}
+            />
+
             {/* Chart rows */}
-            {CHARTS.map(({ label, unit, component: ChartComponent }) => (
+            {CHARTS.map(({ label, unit, component: ChartComponent }, idx) => (
               <div key={label} className="flex flex-col">
                 {/* Chart label row */}
                 <div className="flex items-center gap-2 px-4 pt-3 pb-1">
@@ -289,6 +346,8 @@ export default function TelemetryDashboard({ sessionId }: Props) {
                     data={mergedData}
                     labelA={labelA}
                     labelB={labelB}
+                    /* Only SpeedChart (idx 0) broadcasts hover — all charts sync via syncId */
+                    onHoverTimeChange={idx === 0 ? handleHoverTimeChange : undefined}
                   />
                 </div>
               </div>
