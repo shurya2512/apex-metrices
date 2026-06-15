@@ -27,11 +27,36 @@ export default function Navbar() {
   };
 
   return (
-    <header
-      className="sticky top-0 z-50 w-full border-b border-am-border bg-am-bg/95 backdrop-blur-sm"
-      role="banner"
-    >
-      <nav className="mx-auto flex h-14 max-w-[1600px] items-center justify-between px-4 lg:px-6">
+    <>
+      <GlassFilter />
+      <header
+        className="sticky top-0 z-50 w-full overflow-hidden border-b border-white/10"
+        style={{
+          boxShadow: "0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1)",
+        }}
+        role="banner"
+      >
+        {/* Glass Layers */}
+        <div
+          className="absolute inset-0 z-0 overflow-hidden"
+          style={{
+            backdropFilter: "blur(20px)",
+            filter: "url(#glass-distortion)",
+            isolation: "isolate",
+          }}
+        />
+        <div
+          className="absolute inset-0 z-10"
+          style={{ background: "rgba(10, 10, 10, 0.45)" }}
+        />
+        <div
+          className="absolute inset-0 z-20 pointer-events-none"
+          style={{
+            boxShadow: "inset 0px -1px 1px 0 rgba(255, 255, 255, 0.1)",
+          }}
+        />
+
+        <nav className="relative z-30 mx-auto flex h-14 max-w-[1600px] items-center justify-between px-4 lg:px-6">
         {/* Logo */}
         <Link
           href="/"
@@ -127,7 +152,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-am-border bg-am-bg md:hidden">
+        <div className="relative z-30 border-t border-white/10 md:hidden">
           <div className="flex flex-col px-4 py-3 gap-1">
             {NAV_LINKS.map(({ href, label, icon: Icon }) => (
               <Link
@@ -138,8 +163,8 @@ export default function Navbar() {
                   flex items-center gap-3 px-3 py-2.5 text-sm font-medium no-underline
                   transition-colors duration-200 cursor-pointer
                   ${isActive(href)
-                    ? "text-am-text border-l-2 border-am-red bg-am-surface"
-                    : "text-am-text-secondary hover:text-am-text hover:bg-am-surface"
+                    ? "text-am-text border-l-2 border-am-red bg-white/5"
+                    : "text-am-text-secondary hover:text-am-text hover:bg-white/5"
                   }
                 `}
               >
@@ -163,5 +188,60 @@ export default function Navbar() {
         </div>
       )}
     </header>
+    </>
   );
 }
+
+// SVG Filter Component for Liquid Glass Effect
+const GlassFilter: React.FC = () => (
+  <svg style={{ display: "none" }}>
+    <filter
+      id="glass-distortion"
+      x="0%"
+      y="0%"
+      width="100%"
+      height="100%"
+      filterUnits="objectBoundingBox"
+    >
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.001 0.005"
+        numOctaves="1"
+        seed="17"
+        result="turbulence"
+      />
+      <feComponentTransfer in="turbulence" result="mapped">
+        <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+        <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+        <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+      </feComponentTransfer>
+      <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+      <feSpecularLighting
+        in="softMap"
+        surfaceScale="5"
+        specularConstant="1"
+        specularExponent="100"
+        lightingColor="white"
+        result="specLight"
+      >
+        <fePointLight x="-200" y="-200" z="300" />
+      </feSpecularLighting>
+      <feComposite
+        in="specLight"
+        operator="arithmetic"
+        k1="0"
+        k2="1"
+        k3="1"
+        k4="0"
+        result="litImage"
+      />
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="softMap"
+        scale="100"
+        xChannelSelector="R"
+        yChannelSelector="G"
+      />
+    </filter>
+  </svg>
+);

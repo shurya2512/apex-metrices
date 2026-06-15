@@ -43,8 +43,8 @@ function TrackFilterButton({
     <button
       onClick={onClick}
       className={`
-        relative overflow-hidden flex items-center justify-between text-left h-16 px-4 rounded-[2px] transition-all duration-200 shrink-0
-        border ${isSelected ? 'border-am-red ring-1 ring-am-red/50' : 'border-am-border hover:border-am-border-hover'}
+        relative overflow-hidden flex items-center justify-between text-left h-16 px-4 rounded-[4px] transition-all duration-200 shrink-0
+        border ${isSelected ? 'border-am-red ring-1 ring-am-red/50 shadow-[0_0_15px_rgba(225,6,0,0.2)]' : 'border-white/10 hover:border-white/30'}
         group
       `}
     >
@@ -124,11 +124,16 @@ export default function SessionsExplorer({ initialSessions }: Props) {
     <>
       <div className="flex flex-col w-full max-w-[1600px] mx-auto px-4 py-8 lg:px-6 lg:py-10">
         
-        {/* TOP BAR: Search & Filter Toggle */}
+        {/* TOP Bar: Search & Filter Toggle */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8 w-full">
           
-          <div className="relative group flex-1">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <div className="relative group flex-1 rounded-[4px] overflow-hidden" style={{ boxShadow: "0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1)" }}>
+            {/* Glass Layers */}
+            <div className="absolute inset-0 z-0 overflow-hidden" style={{ backdropFilter: "blur(12px)", filter: "url(#glass-distortion)", isolation: "isolate" }} />
+            <div className="absolute inset-0 z-10 transition-colors duration-[400ms]" style={{ background: "rgba(15, 15, 15, 0.35)" }} />
+            <div className="absolute inset-0 z-20 pointer-events-none" style={{ boxShadow: "inset 0px 1px 1px 0 rgba(255, 255, 255, 0.15), inset 0px -1px 1px 0 rgba(255, 255, 255, 0.05)" }} />
+            
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-30">
               <Search size={18} className="text-am-text-muted group-focus-within:text-am-red transition-colors" />
             </div>
             <input
@@ -137,8 +142,8 @@ export default function SessionsExplorer({ initialSessions }: Props) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="
-                w-full bg-am-surface border border-am-border rounded-[2px] 
-                py-4 pl-12 pr-4 text-sm text-am-text placeholder-am-text-muted
+                relative z-30 w-full bg-transparent border border-transparent rounded-[4px] 
+                py-4 pl-12 pr-4 text-sm text-white placeholder-am-text-muted
                 focus:outline-none focus:border-am-red focus:ring-1 focus:ring-am-red/50
                 transition-all duration-200
               "
@@ -148,16 +153,26 @@ export default function SessionsExplorer({ initialSessions }: Props) {
           <button
             onClick={() => setIsDrawerOpen(true)}
             className="
-              flex items-center justify-center gap-2 px-6 py-4
-              bg-am-surface border border-am-border rounded-[2px]
-              text-sm font-semibold tracking-wide text-am-text hover:text-white
-              hover:border-am-red transition-all duration-200 shrink-0
+              relative overflow-hidden flex items-center justify-center gap-2 px-6 py-4
+              rounded-[4px] cursor-pointer
+              text-sm font-semibold tracking-wide text-white
+              transition-all duration-[400ms] shrink-0
+              hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(225,6,0,0.15)]
+              group
             "
+            style={{ boxShadow: "0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1)" }}
           >
-            <SlidersHorizontal size={18} />
-            <span className="uppercase tracking-widest font-data text-[11px]">
-              {selectedCircuit ? "Track Selected" : "Filter Tracks"}
-            </span>
+            {/* Glass Layers */}
+            <div className="absolute inset-0 z-0 overflow-hidden" style={{ backdropFilter: "blur(12px)", filter: "url(#glass-distortion)", isolation: "isolate" }} />
+            <div className="absolute inset-0 z-10 transition-colors duration-[400ms]" style={{ background: "rgba(15, 15, 15, 0.35)" }} />
+            <div className="absolute inset-0 z-20 pointer-events-none group-hover:bg-[#e10600]/5 transition-colors duration-[400ms]" style={{ boxShadow: "inset 0px 1px 1px 0 rgba(255, 255, 255, 0.15), inset 0px -1px 1px 0 rgba(255, 255, 255, 0.05)" }} />
+
+            <div className="relative z-30 flex items-center gap-2 group-hover:text-white transition-colors duration-200">
+              <SlidersHorizontal size={18} className="group-hover:text-am-red transition-colors duration-200" />
+              <span className="uppercase tracking-widest font-data text-[11px]">
+                {selectedCircuit ? "Track Selected" : "Filter Tracks"}
+              </span>
+            </div>
           </button>
         </div>
 
@@ -211,58 +226,66 @@ export default function SessionsExplorer({ initialSessions }: Props) {
       {/* Sliding Panel */}
       <div 
         className={`
-          fixed top-0 right-0 h-full w-full sm:w-[400px] bg-am-bg border-l border-am-border z-50
+          fixed top-0 right-0 h-full w-full sm:w-[400px] border-l border-white/10 z-50
           transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
-          flex flex-col shadow-2xl
+          flex flex-col shadow-2xl overflow-hidden
           ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
-        <div className="flex items-center justify-between p-6 border-b border-am-border shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="h-4 w-[2px] bg-am-red" aria-hidden="true" />
-            <h2 className="text-lg font-bold tracking-tight text-am-text uppercase">
-              Filter by Track
-            </h2>
-          </div>
-          <button 
-            onClick={() => setIsDrawerOpen(false)}
-            className="text-am-text-muted hover:text-white transition-colors p-2"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-3 custom-scrollbar">
-          <button
-            onClick={() => setSelectedCircuit(null)}
-            className={`
-              text-left px-4 py-3 text-sm font-semibold rounded-[2px] transition-all duration-200 border
-              ${selectedCircuit === null 
-                ? 'bg-am-red/10 border-am-red text-am-red' 
-                : 'bg-am-surface border-am-border text-am-text hover:bg-am-border'}
-            `}
-          >
-            All Circuits
-          </button>
-          
-          {circuits.map((circuit, idx) => (
-            <TrackFilterButton 
-              key={circuit}
-              circuit={circuit}
-              idx={idx}
-              isSelected={selectedCircuit === circuit}
-              onClick={() => setSelectedCircuit(circuit)}
-            />
-          ))}
-        </div>
+        {/* Glass Layers */}
+        <div className="absolute inset-0 z-0 overflow-hidden" style={{ backdropFilter: "blur(20px)", filter: "url(#glass-distortion)", isolation: "isolate" }} />
+        <div className="absolute inset-0 z-10" style={{ background: "rgba(10, 10, 10, 0.45)" }} />
+        <div className="absolute inset-0 z-20 pointer-events-none" style={{ boxShadow: "inset 1px 0px 1px 0 rgba(255, 255, 255, 0.1)" }} />
         
-        <div className="p-6 border-t border-am-border shrink-0">
-          <button
-            onClick={() => setIsDrawerOpen(false)}
-            className="w-full bg-am-red text-white py-3 rounded-[2px] font-data text-xs tracking-widest uppercase hover:bg-red-700 transition-colors"
-          >
-            Apply Filters
-          </button>
+        {/* Content wrapper */}
+        <div className="relative z-30 flex flex-col h-full w-full">
+          <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-[2px] bg-am-red" aria-hidden="true" />
+              <h2 className="text-lg font-bold tracking-tight text-white uppercase">
+                Filter by Track
+              </h2>
+            </div>
+            <button 
+              onClick={() => setIsDrawerOpen(false)}
+              className="text-am-text-muted hover:text-white transition-colors p-2"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-3 custom-scrollbar">
+            <button
+              onClick={() => setSelectedCircuit(null)}
+              className={`
+                text-left px-4 py-3 text-sm font-semibold rounded-[4px] transition-all duration-200 border
+                ${selectedCircuit === null 
+                  ? 'bg-am-red/10 border-am-red text-am-red shadow-[0_0_15px_rgba(225,6,0,0.2)]' 
+                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}
+              `}
+            >
+              All Circuits
+            </button>
+            
+            {circuits.map((circuit, idx) => (
+              <TrackFilterButton 
+                key={circuit}
+                circuit={circuit}
+                idx={idx}
+                isSelected={selectedCircuit === circuit}
+                onClick={() => setSelectedCircuit(circuit)}
+              />
+            ))}
+          </div>
+          
+          <div className="p-6 border-t border-white/10 shrink-0">
+            <button
+              onClick={() => setIsDrawerOpen(false)}
+              className="w-full bg-am-red text-white py-3 rounded-[4px] font-data text-xs tracking-widest uppercase hover:bg-red-700 transition-colors shadow-[0_0_15px_rgba(225,6,0,0.3)]"
+            >
+              Apply Filters
+            </button>
+          </div>
         </div>
       </div>
     </>

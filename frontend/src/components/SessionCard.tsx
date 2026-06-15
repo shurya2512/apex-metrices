@@ -21,23 +21,49 @@ export default function SessionCard({ session }: { session: Session }) {
     <Link
       href={`/sessions/${session.session_id}`}
       className="
-        group relative flex flex-col gap-3 p-4
-        bg-am-surface border border-am-border
-        rounded-[2px] no-underline cursor-pointer
-        transition-all duration-200
-        hover:border-am-border-hover hover:-translate-y-0.5
+        group relative flex flex-col p-5
+        rounded-[4px] no-underline cursor-pointer
+        transition-all duration-[400ms]
+        hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(225,6,0,0.15)]
+        overflow-hidden
       "
+      style={{
+        boxShadow: "0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1)",
+      }}
       id={`session-card-${session.session_id}`}
     >
+      {/* Glass Layers */}
+      <div
+        className="absolute inset-0 z-0 overflow-hidden"
+        style={{
+          backdropFilter: "blur(12px)",
+          filter: "url(#glass-distortion)",
+          isolation: "isolate",
+        }}
+      />
+      <div
+        className="absolute inset-0 z-10 transition-colors duration-[400ms]"
+        style={{ background: "rgba(15, 15, 15, 0.35)" }}
+      />
+      <div
+        className="absolute inset-0 z-20 pointer-events-none group-hover:bg-[#e10600]/5 transition-colors duration-[400ms]"
+        style={{
+          boxShadow:
+            "inset 0px 1px 1px 0 rgba(255, 255, 255, 0.15), inset 0px -1px 1px 0 rgba(255, 255, 255, 0.05)",
+        }}
+      />
       {/* Left accent bar — appears on hover */}
       <div
         className="
-          absolute left-0 top-2 bottom-2 w-[2px]
+          absolute left-0 top-2 bottom-2 w-[3px]
           bg-am-red opacity-0 transition-opacity duration-200
-          group-hover:opacity-100
+          group-hover:opacity-100 z-30
         "
         aria-hidden="true"
       />
+
+      {/* Main Content Wrapper */}
+      <div className="relative z-30 flex flex-col gap-3 h-full">
 
       {/* Top row: session type badge + year */}
       <div className="flex items-center justify-between">
@@ -89,6 +115,7 @@ export default function SessionCard({ session }: { session: Session }) {
           className="text-am-text-muted group-hover:text-am-red group-hover:translate-x-0.5 transition-all duration-200"
           aria-hidden="true"
         />
+      </div>
       </div>
     </Link>
   );

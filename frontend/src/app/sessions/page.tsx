@@ -4,6 +4,7 @@ import { fetchSessions } from "@/lib/api";
 import type { Session } from "@/lib/api";
 import F1TyreLoader from "@/components/F1TyreLoader";
 import SessionsExplorer from "@/components/SessionsExplorer";
+import { TheInfiniteGrid } from "@/components/ui/the-infinite-grid";
 
 export const metadata = {
   title: "Sessions | ApexMetrics",
@@ -64,14 +65,13 @@ async function SessionDataWrapper() {
 /* ---------- Page ---------- */
 export default function SessionsPage() {
   return (
-    <div className="flex flex-1 flex-col relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 telemetry-grid opacity-20 pointer-events-none" aria-hidden="true" />
-      
-      {/* Suspense handles the async fetch */}
-      <Suspense fallback={<SessionsLoading />}>
-        <SessionDataWrapper />
-      </Suspense>
-    </div>
+    <TheInfiniteGrid>
+      <div className="flex flex-1 flex-col w-full z-10 pt-8 pb-32">
+        {/* Suspense handles the async fetch */}
+        <Suspense fallback={<SessionsLoading />}>
+          <SessionDataWrapper />
+        </Suspense>
+      </div>
+    </TheInfiniteGrid>
   );
 }
