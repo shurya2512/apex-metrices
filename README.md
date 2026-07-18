@@ -2,8 +2,6 @@
 
 ApexMetrics is a high-performance, full-stack web application that serves as an elite, pit-wall telemetry console for motorsport enthusiasts and race engineers[cite: 2]. The platform aggregates, processes, and visualizes raw high-frequency time-series data from live and historical racing sessions[cite: 2].
 
-🔗 **Live Production URL:** [https://apex-metrics.vercel.app](https://apex-metrics.vercel.app) *(Replace with your live link once deployed)*
-
 ---
 
 ## 🛠️ The Tech Stack
